@@ -1,4 +1,4 @@
-// Configuración - MISMA URL que arriba
+// Configuración - MISMA URL
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsPj9OX59TC_rzS34hWt2N2cVrBSHJ7cl02cJ0fg1H0yVzxp5JcmL8rYmfmMMQpdISPw/exec';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Botón actualizar
     refreshBtn.addEventListener('click', loadData);
 
-    // Botón limpiar (esto limpiará solo localmente)
+    // Botón limpiar
     clearBtn.addEventListener('click', function() {
         if (confirm('¿Estás seguro de que quieres limpiar la vista local?')) {
             dataContent.innerHTML = '<p class="no-data">No hay datos guardados aún</p>';
@@ -29,8 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadData() {
         try {
+            console.log('🔄 Cargando datos desde Google Sheets...');
             const response = await fetch(API_URL);
             const result = await response.json();
+            
+            console.log('📊 Datos recibidos:', result);
             
             if (result.success) {
                 updateStats(result.data);
@@ -39,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Error cargando datos: ' + result.error);
             }
         } catch (error) {
+            console.error('❌ Error cargando datos:', error);
             alert('Error de conexión: ' + error.message);
         }
     }
@@ -81,7 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportData() {
-        // Esto exportará los datos actuales cargados
         const dataToExport = {
             exportDate: new Date().toISOString(),
             data: Array.from(document.querySelectorAll('.user-data')).map(item => ({
@@ -103,4 +106,3 @@ document.addEventListener('DOMContentLoaded', function() {
         URL.revokeObjectURL(url);
     }
 });
-
