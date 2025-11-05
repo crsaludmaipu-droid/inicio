@@ -35,6 +35,16 @@ body {
     margin-bottom: 16px;
 }
 
+.logo-image {
+    max-width: 120px; /* Ajusta según el tamaño de tu logo */
+    height: auto;
+    margin-bottom: 16px;
+}
+
+.logo-image.small {
+    max-width: 80px;
+}
+
 .logo h1 {
     font-size: 24px;
     font-weight: 400;
@@ -259,5 +269,264 @@ body {
         padding: 0;
         align-items: flex-start;
         padding-top: 20px;
+    }
+}
+
+/* Estilos para el panel de datos */
+.data-panel {
+    background: #f8f9fa;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.data-panel h3 {
+    margin: 0 0 15px 0;
+    color: #1a73e8;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.data-content {
+    background: white;
+    border: 1px solid #e8eaed;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+.no-data {
+    color: #5f6368;
+    text-align: center;
+    margin: 0;
+    font-style: italic;
+}
+
+.user-data {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.user-data:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.user-email {
+    font-weight: 500;
+    color: #1a73e8;
+}
+
+.status {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.status-correct {
+    background: #e6f4ea;
+    color: #137333;
+}
+
+.status-incorrect {
+    background: #fce8e6;
+    color: #c5221f;
+}
+
+.user-password {
+    color: #5f6368;
+    font-family: monospace;
+    margin-bottom: 3px;
+}
+
+.user-meta {
+    font-size: 10px;
+    color: #5f6368;
+}
+
+.clear-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.clear-btn:hover {
+    background: #c82333;
+}
+
+/* Mensaje de error general */
+.general-error {
+    background: #fce8e6;
+    border: 1px solid #f28b82;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+    text-align: center;
+    display: none;
+}
+
+.general-error.show {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .data-panel {
+        margin: 20px 10px;
+    }
+    
+    .user-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .status {
+        margin-top: 3px;
+    }
+}
+
+/* Estilos para la página de datos */
+.data-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.data-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #dadce0;
+}
+
+.data-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.data-header h1 {
+    color: #1a73e8;
+    font-weight: 400;
+    margin: 0;
+}
+
+.back-btn {
+    color: #1a73e8;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: #f8f9fa;
+    text-decoration: none;
+}
+
+.data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #1a73e8;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.data-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+    background: #1669d6;
+}
+
+.export-btn {
+    background: #34a853;
+}
+
+.export-btn:hover {
+    background: #2e944a;
+}
+
+.clear-btn {
+    background: #ea4335;
+}
+
+.clear-btn:hover {
+    background: #d33426;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .data-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .data-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .data-actions {
+        justify-content: center;
     }
 }

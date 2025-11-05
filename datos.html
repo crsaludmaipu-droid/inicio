@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos Guardados - Mi Sitio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="data-container">
+        <div class="data-header">
+            <div class="logo">
+                <img src="assets/image/logo.png" alt="Mi Sitio" class="logo-image">
+                <h1>Datos Guardados</h1>
+            </div>
+            <a href="index.html" class="back-btn">← Volver al Login</a>
+        </div>
+
+        <div class="data-panel">
+            <div class="data-stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalAttempts">0</span>
+                    <span class="stat-label">Total de Intentos</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="successAttempts">0</span>
+                    <span class="stat-label">Correctos</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="failedAttempts">0</span>
+                    <span class="stat-label">Incorrectos</span>
+                </div>
+            </div>
+
+            <div class="data-actions">
+                <button class="action-btn" id="refreshData">🔄 Actualizar</button>
+                <button class="action-btn export-btn" id="exportData">📤 Exportar JSON</button>
+                <button class="action-btn clear-btn" id="clearData">🗑️ Limpiar Todo</button>
+            </div>
+
+            <div class="data-content" id="dataContent">
+                <p class="no-data">No hay datos guardados aún</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="datos.js"></script>
+</body>
+</html>
