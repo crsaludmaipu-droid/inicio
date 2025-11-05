@@ -1,5 +1,5 @@
 // Configuración - MISMA URL que arriba
-const API_URL = 'https://script.google.com/macros/s/AKfycbzeRJSHD1uZcdXTARiCBMZadSKC-bACw8U7Zrzbrg_0dt6G_evmY4trrxekAmsbVink9g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwsPj9OX59TC_rzS34hWt2N2cVrBSHJ7cl02cJ0fg1H0yVzxp5JcmL8rYmfmMMQpdISPw/exec';
 
 document.addEventListener('DOMContentLoaded', function() {
     const dataContent = document.getElementById('dataContent');
@@ -103,3 +103,4 @@ document.addEventListener('DOMContentLoaded', function() {
         URL.revokeObjectURL(url);
     }
 });
+
